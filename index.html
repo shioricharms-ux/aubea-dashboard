@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aubea ダッシュボード</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- サイドナビ -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">Aubea<br><span>ダッシュボード</span></div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-section="home" onclick="showSection('home', this)">🏠 ホーム</li>
+        <li class="nav-item" data-section="cases" onclick="showSection('cases', this)">📋 案件</li>
+        <li class="nav-item" data-section="tasks" onclick="showSection('tasks', this)">✅ タスク</li>
+      </ul>
+      <div class="sidebar-updated" id="updatedAt">読み込み中...</div>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+
+      <!-- ホーム -->
+      <section id="section-home" class="section active">
+        <h1 class="section-title">事業ダッシュボード</h1>
+
+        <!-- KPI -->
+        <div class="kpi-grid">
+          <div class="kpi-card accent-blue">
+            <div class="kpi-label">進行中の案件</div>
+            <div class="kpi-value" id="kpi-active">—</div>
+            <div class="kpi-sub">件</div>
+          </div>
+          <div class="kpi-card accent-orange">
+            <div class="kpi-label">商談中</div>
+            <div class="kpi-value" id="kpi-negotiating">—</div>
+            <div class="kpi-sub">件</div>
+          </div>
+          <div class="kpi-card accent-red">
+            <div class="kpi-label">未完了タスク</div>
+            <div class="kpi-value" id="kpi-tasks">—</div>
+            <div class="kpi-sub">件</div>
+          </div>
+          <div class="kpi-card accent-green">
+            <div class="kpi-label">総案件数</div>
+            <div class="kpi-value" id="kpi-total">—</div>
+            <div class="kpi-sub">件</div>
+          </div>
+        </div>
+
+        <!-- 事業軸ステータス -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">🏢 事業軸の状況</div>
+          <div id="axes-list"></div>
+        </div>
+
+        <div class="content-grid">
+          <!-- 進行中案件 -->
+          <div class="card">
+            <div class="card-header">📋 進行中の案件</div>
+            <div id="active-cases-list" class="item-list"></div>
+          </div>
+          <!-- 直近タスク -->
+          <div class="card">
+            <div class="card-header">✅ 未完了タスク（直近）</div>
+            <div id="recent-tasks-list" class="item-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 案件一覧 -->
+      <section id="section-cases" class="section">
+        <h1 class="section-title">📋 案件一覧</h1>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterCases('all', this)">すべて</button>
+          <button class="filter-btn" onclick="filterCases('進行中', this)">進行中</button>
+          <button class="filter-btn" onclick="filterCases('商談中', this)">商談中</button>
+          <button class="filter-btn" onclick="filterCases('完了', this)">完了</button>
+          <button class="filter-btn" onclick="filterCases('保留', this)">保留</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>案件名</th><th>事業種別</th><th>ステータス</th><th>担当者</th><th>期限</th></tr>
+            </thead>
+            <tbody id="cases-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- タスク一覧 -->
+      <section id="section-tasks" class="section">
+        <h1 class="section-title">✅ タスク管理</h1>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterTasks('all', this)">すべて</button>
+          <button class="filter-btn" onclick="filterTasks('未着手', this)">未着手</button>
+          <button class="filter-btn" onclick="filterTasks('進行中', this)">進行中</button>
+          <button class="filter-btn" onclick="filterTasks('保留', this)">保留</button>
+          <button class="filter-btn" onclick="filterTasks('完了', this)">完了</button>
+        </div>
+        <div class="member-filter" id="member-filter"></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>タスク名</th><th>案件</th><th>担当者</th><th>優先度</th><th>ステータス</th><th>期限</th></tr>
+            </thead>
+            <tbody id="tasks-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
