@@ -6,6 +6,7 @@ from datetime import datetime
 TOKEN = os.environ.get("NOTION_TOKEN")
 if not TOKEN:
     raise ValueError("NOTION_TOKEN が設定されていません")
+
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Notion-Version": "2022-06-28",
@@ -13,24 +14,28 @@ HEADERS = {
 }
 
 DB_IDS = {
-    "cases": "34a19575-cf10-81d3-bb84-eb69f1688402",
-    "tasks": "34a19575-cf10-814d-93ad-f94700ad851e"
+    "cases":       "34a19575-cf10-81d3-bb84-eb69f1688402",
+    "tasks":       "34a19575-cf10-814d-93ad-f94700ad851e",
+    "initiatives": "34a19575-cf10-81d6-a7eb-fb034373dec5",
+    "notes":       "34a19575-cf10-8146-b5d3-f4c605394e74",
+    "finance":     "34a19575-cf10-81e9-b2bd-e10504113a59"
 }
 
 BUSINESS_AXES = [
-    {"name": "スライド資料作成代行", "status": "稼働中", "note": "無料モニター案件進行中"},
-    {"name": "福祉バックオフィス代行", "status": "ステイ中", "note": "再始動タイミング未定"},
-    {"name": "AI活用コンサル・Claude構築代行", "status": "準備中", "note": "6〜8月始動予定"}
+    {"name": "スライド資料作成代行",       "status": "稼働中",  "note": "無料モニター案件進行中"},
+    {"name": "福祉バックオフィス代行",     "status": "ステイ中","note": "再始動タイミング未定"},
+    {"name": "AI活用コンサル・Claude構築代行", "status": "準備中","note": "6〜8月始動予定"}
 ]
 
+
 def query_db(db_id):
-    results = []
-    cursor = None
+    results, cursor = [], None
     while True:
         body = {"page_size": 100}
         if cursor:
             body["start_cursor"] = cursor
-        r = requests.post(f"https://api.notion.com/v1/databases/{db_id}/query", headers=HEADERS, json=body)
+        r = requests.post(f"https://api.notion.com/v1/databases/{db_id}/query",
+                          headers=HEADERS, json=body)
         r.raise_for_status()
         data = r.json()
         results.extend(data["results"])
@@ -39,32 +44,32 @@ def query_db(db_id):
         cursor = data["next_cursor"]
     return results
 
+
 def get_text(prop):
     if not prop:
         return ""
-    if prop["type"] == "title":
-        items = prop.get("title", [])
-    elif prop["type"] == "rich_text":
-        items = prop.get("rich_text", [])
-    else:
-        return ""
+    items = prop.get("title") or prop.get("rich_text") or []
     return "".join(t.get("plain_text", "") for t in items)
 
+
 def get_select(prop):
-    if not prop or prop["type"] != "select":
+    if not prop or prop["type"] not in ("select", "status"):
         return ""
-    sel = prop.get("select")
+    sel = prop.get("select") or prop.get("status")
     return sel["name"] if sel else ""
+
 
 def get_multi_select(prop):
     if not prop or prop["type"] != "multi_select":
         return []
     return [s["name"] for s in prop.get("multi_select", [])]
 
+
 def get_number(prop):
     if not prop or prop["type"] != "number":
         return 0
     return prop.get("number") or 0
+
 
 def get_date(prop):
     if not prop or prop["type"] != "date":
@@ -72,74 +77,142 @@ def get_date(prop):
     d = prop.get("date")
     return d["start"] if d else ""
 
+
+def get_date_range(prop):
+    if not prop or prop["type"] != "date":
+        return None, None
+    d = prop.get("date")
+    if not d:
+        return None, None
+    return d.get("start"), d.get("end") or d.get("start")
+
+
 def get_relation_ids(prop):
     if not prop or prop["type"] != "relation":
         return []
     return [r["id"] for r in prop.get("relation", [])]
+
 
 def parse_cases(rows):
     cases = []
     for row in rows:
         p = row["properties"]
         cases.append({
-            "id": row["id"],
-            "name": get_text(p.get("案件名")),
-            "type": get_select(p.get("事業種別")),
-            "status": get_select(p.get("ステータス")),
-            "amount": get_number(p.get("金額")),
+            "id":       row["id"],
+            "name":     get_text(p.get("案件名")),
+            "type":     get_select(p.get("事業種別")),
+            "status":   get_select(p.get("ステータス")),
+            "amount":   get_number(p.get("金額")),
             "deadline": get_date(p.get("期限")),
-            "members": get_multi_select(p.get("担当者")),
-            "memo": get_text(p.get("メモ"))
+            "members":  get_multi_select(p.get("担当者")),
+            "memo":     get_text(p.get("メモ"))
         })
     return cases
+
 
 def parse_tasks(rows):
     tasks = []
     for row in rows:
         p = row["properties"]
         tasks.append({
-            "id": row["id"],
-            "name": get_text(p.get("タスク名")),
+            "id":       row["id"],
+            "name":     get_text(p.get("タスク名")),
             "case_ids": get_relation_ids(p.get("案件")),
-            "member": get_select(p.get("担当者")),
+            "member":   get_select(p.get("担当者")),
             "priority": get_select(p.get("優先度")),
-            "status": get_select(p.get("ステータス")),
+            "status":   get_select(p.get("ステータス")),
             "deadline": get_date(p.get("期限")),
-            "memo": get_text(p.get("メモ"))
+            "memo":     get_text(p.get("メモ"))
         })
     return tasks
 
+
+def parse_initiatives(rows):
+    items = []
+    for row in rows:
+        p = row["properties"]
+        start, end = get_date_range(p.get("期間"))
+        items.append({
+            "id":       row["id"],
+            "name":     get_text(p.get("イニシアティブ名")),
+            "category": get_select(p.get("カテゴリ")),
+            "status":   get_select(p.get("ステータス")),
+            "start":    start,
+            "end":      end,
+            "assignee": get_select(p.get("担当")),
+            "memo":     get_text(p.get("メモ"))
+        })
+    return items
+
+
+def parse_notes(rows):
+    items = []
+    for row in rows:
+        p = row["properties"]
+        items.append({
+            "id":       row["id"],
+            "title":    get_text(p.get("タイトル")),
+            "category": get_select(p.get("カテゴリ")),
+            "tags":     get_multi_select(p.get("タグ")),
+            "memo":     get_text(p.get("メモ"))
+        })
+    return items
+
+
+def parse_finance(rows):
+    items = []
+    for row in rows:
+        p = row["properties"]
+        items.append({
+            "id":      row["id"],
+            "month":   get_text(p.get("月")),
+            "income":  get_number(p.get("収入合計")),
+            "expense": get_number(p.get("支出合計")),
+            "target":  get_number(p.get("目標収入")),
+            "memo":    get_text(p.get("メモ"))
+        })
+    return sorted(items, key=lambda x: x["month"])
+
+
 def main():
     print("Notionからデータ取得中...")
-    cases = parse_cases(query_db(DB_IDS["cases"]))
-    tasks = parse_tasks(query_db(DB_IDS["tasks"]))
+
+    cases       = parse_cases(query_db(DB_IDS["cases"]))
+    tasks       = parse_tasks(query_db(DB_IDS["tasks"]))
+    initiatives = parse_initiatives(query_db(DB_IDS["initiatives"]))
+    notes       = parse_notes(query_db(DB_IDS["notes"]))
+    finance     = parse_finance(query_db(DB_IDS["finance"]))
 
     case_map = {c["id"]: c["name"] for c in cases}
     for t in tasks:
         t["case_name"] = case_map.get(t["case_ids"][0], "") if t["case_ids"] else ""
 
-    active = [c for c in cases if c["status"] == "進行中"]
+    active      = [c for c in cases if c["status"] == "進行中"]
     negotiating = [c for c in cases if c["status"] == "商談中"]
-    pending_tasks = [t for t in tasks if t["status"] != "完了"]
+    pending     = [t for t in tasks if t["status"] != "完了"]
 
     data = {
-        "updated_at": datetime.now().strftime("%Y/%m/%d %H:%M"),
+        "updated_at":    datetime.now().strftime("%Y/%m/%d %H:%M"),
         "business_axes": BUSINESS_AXES,
         "summary": {
-            "active_cases": len(active),
+            "active_cases":      len(active),
             "negotiating_cases": len(negotiating),
-            "pending_tasks": len(pending_tasks),
-            "total_cases": len(cases)
+            "pending_tasks":     len(pending),
+            "total_cases":       len(cases)
         },
-        "cases": cases,
-        "tasks": tasks
+        "cases":       cases,
+        "tasks":       tasks,
+        "initiatives": initiatives,
+        "notes":       notes,
+        "finance":     finance
     }
 
     os.makedirs("data", exist_ok=True)
     with open("data/data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"完了: 案件{len(cases)}件 / タスク{len(tasks)}件")
+    print(f"完了: 案件{len(cases)}件 / タスク{len(tasks)}件 / イニシアティブ{len(initiatives)}件 / ノート{len(notes)}件 / 収支{len(finance)}件")
+
 
 if __name__ == "__main__":
     main()
