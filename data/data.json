@@ -1,0 +1,48 @@
+{
+  "updated_at": "2026/04/22 07:37",
+  "summary": {
+    "active_cases": 0,
+    "negotiating_cases": 0,
+    "total_clients": 5,
+    "total_income": 0
+  },
+  "cases": [],
+  "clients": [
+    {
+      "id": "34a19575-cf10-815c-a171-d245970899cf",
+      "name": "小倉さん",
+      "relation": "モニター",
+      "industry": "福祉",
+      "memo": "共生支援協会理事長。放課後デイ等。確定候補（5万円固定）"
+    },
+    {
+      "id": "34a19575-cf10-8176-9a66-fab3ed3d83e4",
+      "name": "まるちゃん",
+      "relation": "モニター",
+      "industry": "その他",
+      "memo": "フリーカメラマン。しおりさんのパートナー。"
+    },
+    {
+      "id": "34a19575-cf10-8180-9472-c27e0f71bf6a",
+      "name": "松本恵さん",
+      "relation": "見込み",
+      "industry": "教育",
+      "memo": "行動管理大学（UBM）講師。北原孝彦さん主宰。"
+    },
+    {
+      "id": "34a19575-cf10-81e7-be6c-c13ba88460ae",
+      "name": "大田じゅりさん",
+      "relation": "見込み",
+      "industry": "教育",
+      "memo": "行動管理大学（UBM）講師。北原孝彦さん主宰。MTG予定。現在セミナー資料作成を無償対応中。"
+    },
+    {
+      "id": "34a19575-cf10-81fa-a7e3-fa15184fb253",
+      "name": "ひよりさん",
+      "relation": "モニター",
+      "industry": "美容",
+      "memo": "既に月3万のバックオフィス関係あり。"
+    }
+  ],
+  "finance": []
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>しおり's ダッシュボード</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- サイドナビ -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">🏠 しおり's<br><span>ダッシュボード</span></div>
+      <ul class="nav-list">
+        <li class="nav-item active" onclick="showSection('home')">🏠 ホーム</li>
+        <li class="nav-item" onclick="showSection('cases')">📋 案件</li>
+        <li class="nav-item" onclick="showSection('clients')">👥 クライアント</li>
+        <li class="nav-item" onclick="showSection('finance')">💰 収支</li>
+      </ul>
+      <div class="sidebar-updated" id="updatedAt">更新中...</div>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+
+      <!-- ホームセクション -->
+      <section id="section-home" class="section active">
+        <h1 class="section-title">事業ダッシュボード</h1>
+
+        <!-- KPIカード -->
+        <div class="kpi-grid">
+          <div class="kpi-card accent-blue">
+            <div class="kpi-label">進行中の案件</div>
+            <div class="kpi-value" id="kpi-active">—</div>
+            <div class="kpi-sub">件</div>
+          </div>
+          <div class="kpi-card accent-orange">
+            <div class="kpi-label">商談中</div>
+            <div class="kpi-value" id="kpi-negotiating">—</div>
+            <div class="kpi-sub">件</div>
+          </div>
+          <div class="kpi-card accent-green">
+            <div class="kpi-label">クライアント数</div>
+            <div class="kpi-value" id="kpi-clients">—</div>
+            <div class="kpi-sub">名</div>
+          </div>
+          <div class="kpi-card accent-purple">
+            <div class="kpi-label">累計収入</div>
+            <div class="kpi-value" id="kpi-income">—</div>
+            <div class="kpi-sub">円</div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <!-- 収支グラフ -->
+          <div class="card wide">
+            <div class="card-header">💰 月別収支</div>
+            <canvas id="financeChart" height="120"></canvas>
+          </div>
+
+          <!-- 進行中案件 -->
+          <div class="card">
+            <div class="card-header">📋 進行中の案件</div>
+            <div id="active-cases-list" class="item-list"></div>
+          </div>
+
+          <!-- クライアント -->
+          <div class="card">
+            <div class="card-header">👥 クライアント</div>
+            <div id="clients-list" class="item-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 案件セクション -->
+      <section id="section-cases" class="section">
+        <h1 class="section-title">📋 案件一覧</h1>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterCases('all')">すべて</button>
+          <button class="filter-btn" onclick="filterCases('進行中')">進行中</button>
+          <button class="filter-btn" onclick="filterCases('商談中')">商談中</button>
+          <button class="filter-btn" onclick="filterCases('完了')">完了</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="cases-table">
+            <thead>
+              <tr><th>案件名</th><th>事業種別</th><th>ステータス</th><th>金額</th><th>期限</th></tr>
+            </thead>
+            <tbody id="cases-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- クライアントセクション -->
+      <section id="section-clients" class="section">
+        <h1 class="section-title">👥 クライアント一覧</h1>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>名前</th><th>関係性</th><th>業種</th><th>メモ</th></tr>
+            </thead>
+            <tbody id="clients-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 収支セクション -->
+      <section id="section-finance" class="section">
+        <h1 class="section-title">💰 収支一覧</h1>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>月</th><th>収入</th><th>支出</th><th>利益</th><th>目標</th><th>達成率</th></tr>
+            </thead>
+            <tbody id="finance-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
