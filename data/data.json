@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026/04/22 08:12",
+  "updated_at": "2026/04/23 06:29",
   "business_axes": [
     {
       "name": "スライド資料作成代行",
@@ -24,5 +24,8 @@
     "total_cases": 0
   },
   "cases": [],
-  "tasks": []
+  "tasks": [],
+  "initiatives": [],
+  "notes": [],
+  "finance": []
 }
